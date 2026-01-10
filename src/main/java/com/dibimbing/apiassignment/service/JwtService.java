@@ -40,7 +40,7 @@ public class JwtService {
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", user.getAuthority());
+        claims.put("roles", user.getRole());
         claims.put("jti", UUID.randomUUID().toString());
 
         return Jwts.builder()
@@ -49,7 +49,7 @@ public class JwtService {
                 .setSubject(user.getUsername())
                 .setAudience("my-frontend-app")
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 5 * 60 * 1000)) // 5 min
+                .setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000 )) // 1 hour
                 .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
 
