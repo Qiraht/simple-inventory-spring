@@ -19,6 +19,6 @@ public class UserRegisterReqDTO {
     private String password;
 
     @Email
-    @NotBlank
+    @NotBlank(message = "Email is required")
     private String email;
 }
