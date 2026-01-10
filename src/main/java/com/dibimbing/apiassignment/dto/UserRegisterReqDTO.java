@@ -21,4 +21,7 @@ public class UserRegisterReqDTO {
     @Email
     @NotBlank
     private String email;
+
+    @NotBlank
+    private String role;
 }
