@@ -5,6 +5,7 @@ import com.dibimbing.apiassignment.dto.ProductResDTO;
 import com.dibimbing.apiassignment.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/products")
+@Validated
 public class ProductController {
     private final ProductService productService;
 

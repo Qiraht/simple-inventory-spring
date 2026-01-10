@@ -3,6 +3,8 @@ package com.dibimbing.apiassignment.service;
 import com.dibimbing.apiassignment.dto.ProductReqDTO;
 import com.dibimbing.apiassignment.dto.ProductResDTO;
 import com.dibimbing.apiassignment.entity.Product;
+import com.dibimbing.apiassignment.exceptions.custom.NotFoundException;
+import com.dibimbing.apiassignment.exceptions.custom.ValidationException;
 import com.dibimbing.apiassignment.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -27,10 +29,15 @@ public class ProductService {
     }
 
     public  ProductResDTO getProductById(Long id) {
-        Product product = productRepository.findById(id).get();
-
         ProductResDTO productResDTO = new ProductResDTO();
-        BeanUtils.copyProperties(product, productResDTO);
+
+        productRepository.findById(id).ifPresentOrElse(
+                product -> {
+                    BeanUtils.copyProperties(product, productResDTO);
+                },
+                () -> { throw new NotFoundException("Product Not Found");}
+        );
+
 
         return productResDTO;
     }
@@ -38,7 +45,7 @@ public class ProductService {
     public List<ProductResDTO> getProduct() {
         List<ProductResDTO> productResponse = new ArrayList<>();
 
-        for (Product product : productRepository.findAllIsDelFalse()) {
+        for (Product product : productRepository.findAllByIsDelFalse()) {
             ProductResDTO productResDTO = new ProductResDTO();
             BeanUtils.copyProperties(product, productResDTO);
             productResponse.add(productResDTO);
@@ -52,31 +59,35 @@ public class ProductService {
 
         // check quantity added
         if (quantity < 1) {
-            System.out.println("Quantity is less than 1");
+            throw new ValidationException("Quantity Not Enough");
         };
 
-        tempProduct.ifPresent(product -> {
-            product.setStock(product.getStock() + quantity);
-            productRepository.save(product);
-        });
+        tempProduct.ifPresentOrElse(
+                product -> {
+                    product.setStock(product.getStock() + quantity);
+                    productRepository.save(product); },
+                () -> { throw new NotFoundException("Product not found"); }
+        );
     }
 
     public void updateProduct(Long id, ProductReqDTO request) {
-        productRepository.findById(id).ifPresent(product -> {
-            product.setName(request.getName());
-            product.setPrice(request.getPrice());
-            product.setStock(request.getStock());
-            if (StringUtils.hasText(request.getDescription())) {
-                product.setDescription(request.getDescription());
-            }
-            productRepository.save(product);
-        });
+        productRepository.findById(id).ifPresentOrElse(
+                product -> {
+                    product.setName(request.getName());
+                    product.setPrice(request.getPrice());
+                    product.setStock(request.getStock());
+                    if (StringUtils.hasText(request.getDescription()))
+                    { product.setDescription(request.getDescription()); }
+                    productRepository.save(product); },
+                () -> { throw new NotFoundException("Product not found"); }
+        );
     }
 
     public void deleteProduct(Long id) {
-        productRepository.findByIdAndIsDelFalse(id).ifPresent(product -> {
-            product.setIsDel(Boolean.TRUE);
-            productRepository.save(product);
-        });
+        productRepository.findByIdAndIsDelFalse(id).ifPresentOrElse(
+                product -> {
+                    product.setIsDel(Boolean.TRUE);
+                    productRepository.save(product); },
+                () -> { throw new NotFoundException("Product not found"); });
     }
 }
