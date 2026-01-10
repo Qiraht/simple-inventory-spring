@@ -1,5 +1,6 @@
 package com.dibimbing.apiassignment.controller;
 
+import com.dibimbing.apiassignment.dto.ProductPatchDTO;
 import com.dibimbing.apiassignment.dto.ProductReqDTO;
 import com.dibimbing.apiassignment.dto.ProductResDTO;
 import com.dibimbing.apiassignment.service.ProductService;
@@ -19,9 +20,9 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN)")
-    public void postProduct(@Valid @RequestBody ProductReqDTO request) {
-        productService.addProduct(request);
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public String postProduct(@Valid @RequestBody ProductReqDTO request) {
+        return productService.addProduct(request);
     }
 
     @GetMapping("/{id}")
@@ -35,21 +36,21 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/stock")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN)")
-    public void addProductStock(@PathVariable("id") Long id, @RequestBody Integer quantity) {
-        productService.addProductStock(id, quantity);
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public String addProductStock(@PathVariable("id") Long id, @RequestBody ProductPatchDTO request) {
+        return productService.addProductStock(id, request.getQuantity());
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN)")
-    public void updateProduct(@PathVariable("id") Long id, @RequestBody ProductReqDTO request) {
-        productService.updateProduct(id, request);
+    @PreAuthorize("hasRole('ADMIN)'")
+    public String updateProduct(@PathVariable("id") Long id, @RequestBody ProductReqDTO request) {
+        return productService.updateProduct(id, request);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN)")
-    public void deleteProduct(@PathVariable("id") Long id) {
-        productService.deleteProduct(id);
+    @PreAuthorize("hasRole('ADMIN')")
+    public String deleteProduct(@PathVariable("id") Long id) {
+        return productService.deleteProduct(id);
     }
 
 }

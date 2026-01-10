@@ -20,15 +20,17 @@ import java.util.Optional;
 public class ProductService {
     private final ProductRepository productRepository;
 
-    public void addProduct(ProductReqDTO request) {
+    public String addProduct(ProductReqDTO request) {
         Product product = new Product();
 
         BeanUtils.copyProperties(request, product);
 
         productRepository.save(product);
+
+        return "Product successfully added, " +  product.getName();
     }
 
-    public  ProductResDTO getProductById(Long id) {
+    public ProductResDTO getProductById(Long id) {
         ProductResDTO productResDTO = new ProductResDTO();
 
         productRepository.findById(id).ifPresentOrElse(
@@ -54,7 +56,7 @@ public class ProductService {
         return productResponse;
     }
 
-    public void addProductStock(Long id, Integer quantity) {
+    public String addProductStock(Long id, Integer quantity) {
         Optional<Product> tempProduct = productRepository.findById(id);
 
         // check quantity added
@@ -68,9 +70,11 @@ public class ProductService {
                     productRepository.save(product); },
                 () -> { throw new NotFoundException("Product not found"); }
         );
+
+        return "Stock added successfully";
     }
 
-    public void updateProduct(Long id, ProductReqDTO request) {
+    public String updateProduct(Long id, ProductReqDTO request) {
         productRepository.findById(id).ifPresentOrElse(
                 product -> {
                     product.setName(request.getName());
@@ -81,13 +85,17 @@ public class ProductService {
                     productRepository.save(product); },
                 () -> { throw new NotFoundException("Product not found"); }
         );
+
+        return "Product updated successfully";
     }
 
-    public void deleteProduct(Long id) {
+    public String deleteProduct(Long id) {
         productRepository.findByIdAndIsDelFalse(id).ifPresentOrElse(
                 product -> {
                     product.setIsDel(Boolean.TRUE);
                     productRepository.save(product); },
                 () -> { throw new NotFoundException("Product not found"); });
+
+        return "Product deleted successfully";
     }
 }
