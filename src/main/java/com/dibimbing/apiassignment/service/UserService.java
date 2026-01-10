@@ -3,24 +3,16 @@ package com.dibimbing.apiassignment.service;
 import com.dibimbing.apiassignment.dto.UserLoginReqDTO;
 import com.dibimbing.apiassignment.dto.UserLoginResDTO;
 import com.dibimbing.apiassignment.dto.UserRegisterReqDTO;
+import com.dibimbing.apiassignment.entity.Role;
 import com.dibimbing.apiassignment.entity.User;
 import com.dibimbing.apiassignment.exceptions.custom.NotFoundException;
 import com.dibimbing.apiassignment.exceptions.custom.ValidationException;
 import com.dibimbing.apiassignment.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +35,7 @@ public class UserService {
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setAuthority("USER");
+        user.setRole(Role.USER);
         userRepository.save(user);
 
         return "Register successfully";
@@ -69,19 +61,14 @@ public class UserService {
         );
     }
 
-    public UserDetails convertToUserDetails(User existUser) {
-        List<GrantedAuthority> authorities = Arrays.stream(existUser.getAuthority().split(",")).toList()
-                .stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-
+    public UserDetails convertToUserDetails(User user) {
         return org.springframework.security.core.userdetails.User.builder()
-                .username(existUser.getUsername())
-                .password(existUser.getPassword())
+                .username(user.getUsername())
+                .password(user.getPassword())
                 // untuk method prePostEnabled securedEnabled jsr250Enabled
 //                .roles(existUser.getAuthority())
 //        prePostEnabled
-                .authorities(authorities)
+                .authorities("ROLE_"+ user.getRole().getValue())
                 .build();
 
     }
