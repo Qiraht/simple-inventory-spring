@@ -28,18 +28,21 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
+                        // Swagger
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .requestMatchers("/users/**").permitAll()
                         // Authentication Required
-                        .requestMatchers(HttpMethod.POST, "/products")
-                        .permitAll().anyRequest().authenticated()
-                        .requestMatchers(HttpMethod.GET, "/products/**")
-                        .permitAll().anyRequest().authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/products/**")
-                        .permitAll().anyRequest().authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/products/**")
-                        .permitAll().anyRequest().authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/products/**")
-                        .permitAll().anyRequest().authenticated())
+                        .requestMatchers(HttpMethod.POST, "/products").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/products/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("ADMIN")
+                        .anyRequest().authenticated())
         .exceptionHandling(
                 ex -> ex.accessDeniedHandler(accessDeniedHandler)
                         .authenticationEntryPoint(unAuthenticationHandler))
