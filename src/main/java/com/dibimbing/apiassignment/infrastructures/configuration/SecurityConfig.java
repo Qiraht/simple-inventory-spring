@@ -39,9 +39,9 @@ public class SecurityConfig {
                         .requestMatchers("/users/**").permitAll()
                         // Authentication Required
                         .requestMatchers(HttpMethod.POST, "/products").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/products/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/products/**").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
         .exceptionHandling(
                 ex -> ex.accessDeniedHandler(accessDeniedHandler)
