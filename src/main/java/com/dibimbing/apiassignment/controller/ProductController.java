@@ -5,6 +5,7 @@ import com.dibimbing.apiassignment.dto.ProductResDTO;
 import com.dibimbing.apiassignment.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN)")
     public void postProduct(@Valid @RequestBody ProductReqDTO request) {
         productService.addProduct(request);
     }
@@ -32,17 +34,20 @@ public class ProductController {
         return productService.getProduct();
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{id}/stock")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN)")
     public void addProductStock(@PathVariable("id") Long id, @RequestBody Integer quantity) {
         productService.addProductStock(id, quantity);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN)")
     public void updateProduct(@PathVariable("id") Long id, @RequestBody ProductReqDTO request) {
         productService.updateProduct(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN)")
     public void deleteProduct(@PathVariable("id") Long id) {
         productService.deleteProduct(id);
     }
