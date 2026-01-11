@@ -39,7 +39,7 @@ public class ProductController {
     public ResponseEntity<List<ProductResDTO>> getProducts() {
         List<ProductResDTO> response = productService.getProduct();
 
-        return  ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/stock")
@@ -66,4 +66,11 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/{id}/sale")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<String> postProductSales(@PathVariable("id") Long id, @RequestParam ProductPatchDTO request) {
+        String response = productService.addProductSales(id, request.getQuantity());
+
+        return ResponseEntity.ok(response);
+    }
 }
