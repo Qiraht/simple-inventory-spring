@@ -29,7 +29,12 @@ public class UserService {
             throw new ValidationException("Username already exists");
         }
 
-        // TODO: Email validation
+        // Email validation
+        if (userRepository.existsByEmail(request.getEmail())) {
+            log.warn("Email already exists: {}", request.getEmail());
+            throw new ValidationException("Username already exists");
+        }
+
 
         User user = new User();
         user.setUsername(request.getUsername());
@@ -37,6 +42,8 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setRole(Role.USER);
         userRepository.save(user);
+
+        log.info("User {} registered successfully", request.getUsername());
 
         return "Register successfully";
     }
@@ -50,6 +57,8 @@ public class UserService {
             log.warn("Passwords don't match");
             throw new ValidationException("Passwords don't match");
         }
+
+        log.info("User {} logged in successfully", user.getUsername());
 
         String token = jwtService.generateToken(user);
         return new UserLoginResDTO(token);
@@ -65,9 +74,6 @@ public class UserService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                // untuk method prePostEnabled securedEnabled jsr250Enabled
-//                .roles(existUser.getAuthority())
-//        prePostEnabled
                 .authorities("ROLE_"+ user.getRole().getValue())
                 .build();
 

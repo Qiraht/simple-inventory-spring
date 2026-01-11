@@ -1,5 +1,9 @@
 package com.dibimbing.apiassignment.entity;
 
+import lombok.Getter;
+
+
+@Getter
 public enum Role {
     USER("USER"),
     ADMIN("ADMIN");

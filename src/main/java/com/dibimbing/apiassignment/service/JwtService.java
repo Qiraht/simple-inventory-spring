@@ -45,7 +45,7 @@ public class JwtService {
 
         return Jwts.builder()
                 .setClaims(claims)
-                .setIssuer("auth-service")
+                .setIssuer("simple-inventory")
                 .setSubject(user.getUsername())
                 .setAudience("my-frontend-app")
                 .setIssuedAt(new Date())

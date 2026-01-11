@@ -26,7 +26,9 @@ public class ProductService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
+    // Used for get all products
     private static final String PRODUCTS_KEY = "products";
+    // Used for get product by Id
     private static final String PRODUCT_ID_KEY = "product::";
 
     public String addProduct(ProductReqDTO request) {
@@ -35,6 +37,7 @@ public class ProductService {
         BeanUtils.copyProperties(request, product);
 
         productRepository.save(product);
+        log.info("Product {} has been added", product);
 
         try {
             redisTemplate.delete(PRODUCTS_KEY);
@@ -114,7 +117,7 @@ public class ProductService {
         // check quantity added
         if (quantity < 1) {
             throw new ValidationException("Quantity Not Enough");
-        };
+        }
 
         tempProduct.ifPresentOrElse(
                 product -> {
@@ -131,6 +134,39 @@ public class ProductService {
                     },
                 () -> { throw new NotFoundException("Product not found"); }
         );
+
+        log.info("Product {} stock has been added", tempProduct.get().getName());
+
+        return "Stock added successfully";
+    }
+
+    public String addProductSales(Long id, Integer quantity) {
+        Optional<Product> tempProduct = productRepository.findById(id);
+
+        // check quantity added
+        if (quantity < 1) {
+            throw new ValidationException("Quantity Not Enough");
+        }
+
+        tempProduct.ifPresentOrElse(
+                product -> {
+                    if(product.getStock() < quantity) {
+                        throw new ValidationException("Product Stocks Not Enough");
+                    }
+                    product.setStock(product.getStock() - quantity);
+                    productRepository.save(product);
+                    try {
+                        redisTemplate.delete(PRODUCTS_KEY);
+                        redisTemplate.delete(PRODUCT_ID_KEY+id);
+                        log.info("deleting cache from redis");
+                    } catch (Exception e) {
+                        log.error("error in redis ",e);
+                    }
+                },
+                () -> { throw new NotFoundException("Product not found"); }
+        );
+
+        log.info("Product {} sold for {}", tempProduct.get().getName(), quantity);
 
         return "Stock added successfully";
     }
@@ -155,6 +191,8 @@ public class ProductService {
                 () -> { throw new NotFoundException("Product not found"); }
         );
 
+        log.info("Product {} has been updated", id);
+
         return "Product updated successfully";
     }
 
@@ -172,6 +210,8 @@ public class ProductService {
                         log.error("error in redis ",e);
                     }},
                 () -> { throw new NotFoundException("Product not found"); });
+
+        log.info("Product {} has been deleted", id);
 
         return "Product deleted successfully";
     }
