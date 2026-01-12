@@ -1,0 +1,31 @@
+services:
+  ## Prometheus
+  prometheus:
+    image: prom/prometheus:main
+    container_name: prometheus-invetory
+    network_mode: host
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    extra_hosts:
+  ##    - "host.docker.internal:host-gateway" ## Docker
+      - "host.containers.internal:host-gateway" ## Podman
+    restart: unless-stopped
+
+  ## Grafana
+  grafana:
+    image: grafana/grafana:main
+    container_name: grafana-inventory
+    network_mode: host
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    extra_hosts:
+      ##    - "host.docker.internal:host-gateway" ## Docker
+      - "host.containers.internal:host-gateway" ## Podman
+    depends_on:
+      - prometheus
+
