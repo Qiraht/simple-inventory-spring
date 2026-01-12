@@ -1,4 +1,4 @@
-FROM maven:3.9.6-openjdk-17 AS build
+FROM maven:3.9-eclipse-temurin-17-jammy AS build
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
