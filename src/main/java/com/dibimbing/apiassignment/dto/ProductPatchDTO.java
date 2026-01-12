@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 public class ProductPatchDTO {
     @NotNull(message = "Quantity cannot be null")
-    @Min(value = 0, message = "Quantity must be >= 0")
+    @Min(value = 1, message = "Quantity must be >= 0")
     private Integer quantity;
 }
