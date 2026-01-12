@@ -9,13 +9,11 @@ import com.dibimbing.apiassignment.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -23,8 +21,7 @@ import java.util.Optional;
 @Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
-
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisService redisService;
 
     // Used for get all products
     private static final String PRODUCTS_KEY = "products";
@@ -39,59 +36,39 @@ public class ProductService {
         productRepository.save(product);
         log.info("Product {} has been added", product);
 
-        try {
-            redisTemplate.delete(PRODUCTS_KEY);
-            log.info("deleting cache from redis");
-        } catch (Exception e) {
-            log.error("error in redis ",e);
-        }
+        redisService.delete(PRODUCTS_KEY);
 
         return "Product successfully added, " +  product.getName();
     }
 
     public ProductResDTO getProductById(Long id) {
-        try {
-            ProductResDTO cacheResponse = (ProductResDTO) redisTemplate.opsForValue().get(PRODUCT_ID_KEY+id);
-            if(Objects.nonNull(cacheResponse)) {
-                log.info("Cache response from redis");
-                return cacheResponse;
-            }
-        } catch (Exception e) {
-            log.error("error in redis ",e);
+        Object cacheResponse = redisService.get(PRODUCT_ID_KEY + id);
+        if (cacheResponse instanceof ProductResDTO) {
+            log.info("Cache response for product {} ", id);
+            return (ProductResDTO) cacheResponse;
         }
 
         ProductResDTO productResDTO = new ProductResDTO();
 
-
         productRepository.findByIdAndIsDelFalse(id).ifPresentOrElse(
                 product -> {
                     BeanUtils.copyProperties(product, productResDTO);
-                    try {
-                        redisTemplate.opsForValue().set(PRODUCT_ID_KEY+id, product);
-                    } catch (Exception e) {
-                        log.error("error in redis ",e);
-                    }
+                    redisService.set(PRODUCT_ID_KEY + id, productResDTO);
                 },
                 () -> { throw new NotFoundException("Product Not Found");}
         );
-
 
         return productResDTO;
     }
 
     public List<ProductResDTO> getProduct() {
-        try {
-            Object cacheObject = redisTemplate.opsForValue().get(PRODUCTS_KEY);
-            if (cacheObject instanceof List) {
-                List<?> cacheList = (List<?>) cacheObject;
-
-                if (!cacheList.isEmpty()) {
-                    log.info("Cache response from redis");
-                    return (List<ProductResDTO>) cacheList;
-                }
+        Object cacheResponse = redisService.get(PRODUCTS_KEY);
+        if (cacheResponse instanceof List) {
+            List<?> cacheList = (List<?>) cacheResponse;
+            if (!cacheList.isEmpty()) {
+                log.info("Cache response for product {} ", PRODUCTS_KEY);
+                return (List<ProductResDTO>) cacheList;
             }
-        } catch (Exception e) {
-            log.error("error in redis ",e);
         }
 
         List<ProductResDTO> productResponse = new ArrayList<>();
@@ -100,14 +77,9 @@ public class ProductService {
             ProductResDTO productResDTO = new ProductResDTO();
             BeanUtils.copyProperties(product, productResDTO);
             productResponse.add(productResDTO);
-
-            try {
-                redisTemplate.opsForValue().set(PRODUCTS_KEY, productResponse);
-            } catch (Exception e) {
-                log.error("error in redis ",e);
-            }
         }
 
+        redisService.set(PRODUCTS_KEY, productResponse);
         return productResponse;
     }
 
@@ -123,20 +95,13 @@ public class ProductService {
                 product -> {
                     product.setStock(product.getStock() + quantity);
                     productRepository.save(product);
-
-                    try {
-                        redisTemplate.delete(PRODUCTS_KEY);
-                        redisTemplate.delete(PRODUCT_ID_KEY+id);
-                        log.info("deleting cache from redis");
-                    } catch (Exception e) {
-                        log.error("error in redis ",e);
-                    }
                     },
                 () -> { throw new NotFoundException("Product not found"); }
         );
 
         log.info("Product {} stock has been added", tempProduct.get().getName());
 
+        redisService.delete(PRODUCT_ID_KEY + id);
         return "Stock added successfully";
     }
 
@@ -155,13 +120,6 @@ public class ProductService {
                     }
                     product.setStock(product.getStock() - quantity);
                     productRepository.save(product);
-                    try {
-                        redisTemplate.delete(PRODUCTS_KEY);
-                        redisTemplate.delete(PRODUCT_ID_KEY+id);
-                        log.info("deleting cache from redis");
-                    } catch (Exception e) {
-                        log.error("error in redis ",e);
-                    }
                 },
                 () -> { throw new NotFoundException("Product not found"); }
         );
@@ -179,20 +137,13 @@ public class ProductService {
                     product.setStock(request.getStock());
                     if (StringUtils.hasText(request.getDescription()))
                     { product.setDescription(request.getDescription()); }
-                    productRepository.save(product);
-
-                    try {
-                        redisTemplate.delete(PRODUCTS_KEY);
-                        redisTemplate.delete(PRODUCT_ID_KEY+id);
-                        log.info("deleting cache from redis");
-                    } catch (Exception e) {
-                        log.error("error in redis ",e);
-                    }},
+                    productRepository.save(product);},
                 () -> { throw new NotFoundException("Product not found"); }
         );
 
         log.info("Product {} has been updated", id);
 
+        redisService.delete(PRODUCT_ID_KEY + id);
         return "Product updated successfully";
     }
 
@@ -200,18 +151,13 @@ public class ProductService {
         productRepository.findByIdAndIsDelFalse(id).ifPresentOrElse(
                 product -> {
                     product.setIsDel(Boolean.TRUE);
-                    productRepository.save(product);
-
-                    try {
-                        redisTemplate.delete(PRODUCTS_KEY);
-                        redisTemplate.delete(PRODUCT_ID_KEY + id);
-                        log.info("deleting cache from redis");
-                    } catch (Exception e) {
-                        log.error("error in redis ",e);
-                    }},
-                () -> { throw new NotFoundException("Product not found"); });
+                    productRepository.save(product);},
+                () -> { throw new NotFoundException("Product not found"); }
+        );
 
         log.info("Product {} has been deleted", id);
+
+        redisService.deleteMultiple(PRODUCT_ID_KEY + id, PRODUCTS_KEY);
 
         return "Product deleted successfully";
     }
