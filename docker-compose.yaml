@@ -4,17 +4,23 @@ services:
     image: mysql:8.0-bookworm
     container_name: mysql-inventory
     environment:
-      - MYSQL_ROOT_PASSWORD=supersecretpassword
-      - MYSQL_DATABASE=inventorydb
+        MYSQL_ROOT_PASSWORD: supersecretpassword
+        MYSQL_DATABASE: inventorydb
     ports:
       - "3306:3306"
+    extra_hosts:
+      ##    - "host.docker.internal:host-gateway" ## Docker
+      - "host.containers.internal:host-gateway" ## Podman
 
   ## Redis
   redis:
     image: redis:7.4.7-alpine
     container_name: redis-inventory
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    extra_hosts:
+      ##    - "host.docker.internal:host-gateway" ## Docker
+      - "host.containers.internal:host-gateway" ## Podman
 
   ## Prometheus
   prometheus:
