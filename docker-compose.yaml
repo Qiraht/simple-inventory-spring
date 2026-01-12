@@ -1,9 +1,25 @@
 services:
+  ## MySQL
+  mysql:
+    image: mysql:8.0-bookworm
+    container_name: mysql-inventory
+    environment:
+      - MYSQL_ROOT_PASSWORD=supersecretpassword
+      - MYSQL_DATABASE=inventorydb
+    ports:
+      - "3306:3306"
+
+  ## Redis
+  redis:
+    image: redis:7.4.7-alpine
+    container_name: redis-inventory
+    ports:
+      - "6379:6379"
+
   ## Prometheus
   prometheus:
     image: prom/prometheus:main
     container_name: prometheus-invetory
-    network_mode: host
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -17,7 +33,6 @@ services:
   grafana:
     image: grafana/grafana:main
     container_name: grafana-inventory
-    network_mode: host
     ports:
       - "3000:3000"
     environment:
