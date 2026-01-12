@@ -37,6 +37,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/products").permitAll()
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
                         .requestMatchers("/users/**").permitAll()
+                        // Allow public access to Prometheus endpoint for scraping
+                        .requestMatchers("/actuator/prometheus").permitAll()
+                        // Allow public access to health and info
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        // Require authentication for all other actuator endpoints
+                        .requestMatchers("/actuator/gateway-status").permitAll()
+                        .requestMatchers("/actuator/**").authenticated()
                         // Authentication Required
                         .requestMatchers(HttpMethod.POST, "/products").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
