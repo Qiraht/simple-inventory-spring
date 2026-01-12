@@ -24,16 +24,14 @@ public class UserService {
 
     public String registerUser(UserRegisterReqDTO request) {
         // Username exist validation
-        if (userRepository.existsByUsername(request.getUsername())) {
-            log.warn("Username already exists: {}", request.getUsername());
-            throw new ValidationException("Username already exists");
-        }
+        userRepository.findByUsername(request.getUsername()).orElseThrow(
+                () -> new NotFoundException("Username has been used")
+        );
 
         // Email validation
-        if (userRepository.existsByEmail(request.getEmail())) {
-            log.warn("Email already exists: {}", request.getEmail());
-            throw new ValidationException("Username already exists");
-        }
+        userRepository.findByEmail(request.getEmail()).orElseThrow(
+                () -> new NotFoundException("Email has been used")
+        );
 
 
         User user = new User();
