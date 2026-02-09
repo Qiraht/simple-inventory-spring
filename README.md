@@ -8,6 +8,8 @@ This repository is using [git-flow](https://github.com/gittower/git-flow-next/) 
 2. Run ```mvn spring-boot:run```
 
 ## API Endpoint
+- **Swagger**
+  <br> For Swagger API Documentation access ```/swagger-ui/index.html```
 - **POST /products**
   <br>Digunakan untuk menambahkan produk
     - Request Body:
