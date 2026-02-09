@@ -24,13 +24,13 @@ public class UserService {
 
     public String registerUser(UserRegisterReqDTO request) {
         // Username exist validation
-        userRepository.findByUsername(request.getUsername()).orElseThrow(
-                () -> new NotFoundException("Username has been used")
+        userRepository.findByUsername(request.getUsername()).ifPresent(
+                user -> new ValidationException("Username has been used")
         );
 
         // Email validation
-        userRepository.findByEmail(request.getEmail()).orElseThrow(
-                () -> new NotFoundException("Email has been used")
+        userRepository.findByEmail(request.getEmail()).ifPresent(
+                user -> new ValidationException("Email has been used")
         );
 
 
