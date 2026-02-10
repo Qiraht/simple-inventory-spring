@@ -42,7 +42,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    // TODO: Add that Jakarta Validation Exception
     // DTO Jakarta Validations
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleBusinessException(MethodArgumentNotValidException ex, HttpServletRequest request) {

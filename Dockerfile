@@ -12,7 +12,6 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-
 EXPOSE 8080
 
 COPY --from=build /app/target/*.jar app.jar
