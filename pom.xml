@@ -57,6 +57,14 @@
             <artifactId>spring-boot-starter-security</artifactId>
             <version>4.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -86,6 +94,8 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- Testing Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa-test</artifactId>
@@ -102,12 +112,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.12.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -123,6 +136,43 @@
                             <artifactId>lombok</artifactId>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <!-- JaCoCo: untuk generate coverage report -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.12</version>
+                <executions>
+
+                    <!-- attach JaCoCo agent sebelum test dijalankan -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- generate report setelah test selesai -->
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+
+                </executions>
+                <configuration>
+                    <excludes>
+                        <exclude>com/dibimbing/apiassignment/ApiAssignmentDay27Application.class</exclude>
+                        <exclude>com/dibimbing/apiassignment/OldApiAssignmentDay27ApplicationTests.class</exclude>
+                        <exclude>com/dibimbing/apiassignment/dto/**</exclude>
+                        <exclude>com/dibimbing/apiassignment/entity/**</exclude>
+                        <exclude>com/dibimbing/apiassignment/exceptions/**</exclude>
+                        <exclude>com/dibimbing/apiassignment/infrastructures/configuration/**</exclude>
+                        <exclude>com/dibimbing/apiassignment/actuator/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
