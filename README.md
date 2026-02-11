@@ -21,11 +21,11 @@ you can use ```qiraht/simple-inventory-spring``` image and run ```docker run -p 
  For Swagger API Documentation access ```/swagger-ui/index.html```
 ### POST /products
 Used to add products. Authentication Required
-    - Request Body:
-        - name: String
-        - stock: Integer
-        - price: Double
-        - description: String
+- Request Body:
+    - name: String
+    - stock: Integer
+    - price: Double
+    - description: String
 ### GET /products
 Used to get product. Public Endpoint (No Authentication Required)
 ### GET /products/{id}
