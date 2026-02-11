@@ -25,14 +25,15 @@ public class UserService {
     public String registerUser(UserRegisterReqDTO request) {
         // Username exist validation
         userRepository.findByUsername(request.getUsername()).ifPresent(
-                user -> new ValidationException("Username has been used")
-        );
+                user -> {
+                    throw new ValidationException("Username has been used");
+                });
 
         // Email validation
         userRepository.findByEmail(request.getEmail()).ifPresent(
-                user -> new ValidationException("Email has been used")
-        );
-
+                user -> {
+                    throw new ValidationException("Email has been used");
+                });
 
         User user = new User();
         user.setUsername(request.getUsername());
@@ -48,8 +49,7 @@ public class UserService {
 
     public UserLoginResDTO LoginUser(UserLoginReqDTO request) {
         User user = userRepository.findByUsername(request.getUsername()).orElseThrow(
-                () -> new NotFoundException("Username not found")
-        );
+                () -> new NotFoundException("Username not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("Passwords don't match");
@@ -64,15 +64,14 @@ public class UserService {
 
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new NotFoundException("User not found")
-        );
+                () -> new NotFoundException("User not found"));
     }
 
     public UserDetails convertToUserDetails(User user) {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .authorities("ROLE_"+ user.getRole().getValue())
+                .authorities("ROLE_" + user.getRole().getValue())
                 .build();
 
     }

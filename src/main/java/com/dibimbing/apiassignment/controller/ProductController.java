@@ -68,7 +68,7 @@ public class ProductController {
 
     @PostMapping("/{id}/sale")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<String> postProductSales(@PathVariable("id") Long id, @RequestParam ProductPatchDTO request) {
+    public ResponseEntity<String> postProductSales(@PathVariable("id") Long id, @RequestBody ProductPatchDTO request) {
         String response = productService.addProductSales(id, request.getQuantity());
 
         return ResponseEntity.ok(response);
