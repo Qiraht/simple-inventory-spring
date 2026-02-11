@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApiAssignmentDay27ApplicationTests extends BaseIntegrationTest {
+class ApiAssignmentDay27ApplicationTests {
 
     @Test
     void contextLoads() {
